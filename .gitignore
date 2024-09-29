@@ -1,0 +1,96 @@
+# Prerequisites
+*.d
+*.uimg
+*.img
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.dep
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+*.num
+*.ralf
+*.dtb
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.bin
+*.dis
+*.rar
+*.asm
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.old
+*.log
+
+# Kernel Module Compile Results
+*.mod*
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+#pyc files
+*.pyc
+.vscode
+.vscode-ctags
+
+# standalone sdk
+/standalone
+
+# rtems components
+/rtems/rtems
+/rtems/rtems-libbsd
+/rtems/rtems-source-builder
+/rtems/rtems-examples
+/toolchain_sources.tar.xz
+
+# third-party
+/third-party/fio
+
+# rtems prebuild
+/configs/dtb
+/toolchain
+
+# example
+/example/*/build*
+/example/*/build*/*
+/example/*/*/build*
+/example/*/*/build*/*
+/example/system/waf_builder/rtems_waf
+/example/system/waf_builder/.waf*
+/example/system/waf_builder/.waf*/*
+/example/system/waf_builder/.lock-waf_linux_build
+!/example/system/waf_builder/build.sh
