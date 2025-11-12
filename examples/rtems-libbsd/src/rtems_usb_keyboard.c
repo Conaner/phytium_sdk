@@ -45,7 +45,9 @@
 #include <rtems/console.h>
 #include <rtems/shell.h>
 #include <rtems/bsd/bsd.h>
+#include <rtems/bsd/modules.h>
 
+#if defined(RTEMS_BSD_MODULE_DEV_USB_INPUT) && (RTEMS_BSD_MODULE_DEV_USB_INPUT)
 
 #define USB_SERIAL_TEST_BUFFER_SIZE 48
 #define PRIO_OPEN  (RTEMS_MAXIMUM_PRIORITY - 12)
@@ -229,3 +231,5 @@ rtems_status_code usb_keyboard_configuration(void)
 
     return sc;
 }
+
+#endif /* RTEMS_BSD_MODULE_DEV_USB_INPUT */

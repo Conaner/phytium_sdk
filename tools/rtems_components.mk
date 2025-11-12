@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+# rule out Windows path in WSL 
+export PATH :=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/snap/bin
+
 RTEMS_STANDALONE := $(RTEMS_SDK_DIR)/standalone
 RTEMS_RSB_DIR := $(RTEMS_SDK_DIR)/rtems/rtems-source-builder
 RTEMS_SRC_DIR := $(RTEMS_SDK_DIR)/rtems/rtems
@@ -114,6 +117,23 @@ define build_rtems_devtree
 	rtems-bin2c -N phytium_dtb $(RTEMS_DTB_DIR)/$(1).dtb  $(RTEMS_DTB_DIR)/$(1).c
 endef
 
+# void build_rtems_fio
+#   $(1) == fio path
+#   $(2) == toolchain prefix
+#   $(3) == rtems bsp path
+define build_rtems_fio
+	@##H## Build the fio.
+	cd $(1) && ./configure --cc=$(2)gcc \
+						   --disable-optimizations \
+						   --extra-cflags=-O3 \
+						   --disable-pmem
+	cd $(1) && make fio CROSS_COMPILE=$(2) \
+						RTEMS_MAKEFILE_PATH=$(3) \
+						V=1
+	cd $(1) && $(2)objcopy -O binary fio fio.bin
+	cd $(1) && cp fio.bin /mnt/d/tftpboot/rtems.bin -f
+endef
+
 # void start_rtems_tester
 #   $(1) == target bsp name
 #   $(2) == rtems tools
@@ -164,8 +184,11 @@ list_bsp:
 distclean_rtems:
 	@rm $(RTEMS_RSB_DIR)/toolchain -rf
 
-build_bsp:
+build_aarch64_bsp:
 	$(call build_rtems_bsp,$(RTEMS_AARCH64_TOOL_PREFIX),$(RTEMS_SRC_DIR))
+
+build_arm_bsp:
+	$(call build_rtems_bsp,$(RTEMS_ARM_TOOL_PREFIX),$(RTEMS_SRC_DIR))
 
 clean_config:
 	@echo -n > $(RTEMS_SRC_DIR)/config.ini
@@ -182,33 +205,41 @@ clean_examples:
 	@rm $(RTEMS_EXAMPLE_DIR)/build -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/.lock-waf* -f
 
+include $(RTEMS_SDK_DIR)/tools/rtems_pd2408_testa.mk
+include $(RTEMS_SDK_DIR)/tools/rtems_pd2308_demo.mk
 include $(RTEMS_SDK_DIR)/tools/rtems_e2000d_demo.mk
 include $(RTEMS_SDK_DIR)/tools/rtems_e2000q_demo.mk
 include $(RTEMS_SDK_DIR)/tools/rtems_phytium_pi.mk
 include $(RTEMS_SDK_DIR)/tools/rtems_d2000_test.mk
 include $(RTEMS_SDK_DIR)/tools/rtems_ft2004_dsk.mk
-include $(RTEMS_SDK_DIR)/tools/rtems_qemu_a53.mk
 
 clean_all: \
-	clean_bsp \
 	e2000d_demo_aarch64_clean \
 	e2000q_demo_aarch64_clean \
 	phytium_pi_aarch64_clean \
 	d2000_test_aarch64_clean \
-	ft2004_dsk_aarch64_clean
+	ft2004_dsk_aarch64_clean \
+	pd2308_demo_clean \
+	pd2408_testa_clean
 
-all: \
+all_bsp: \
 	clean_config \
 	e2000d_demo_aarch64_config \
 	e2000q_demo_aarch64_config \
 	phytium_pi_aarch64_config \
 	d2000_test_aarch64_config \
 	ft2004_dsk_aarch64_config \
-	qemu_a53_config \
-	build_bsp \
+	pd2308_demo_config \
+	pd2408_testa_config \
+	build_aarch64_bsp
+
+all_libbsd: \
 	e2000d_demo_aarch64_libbsd \
 	e2000q_demo_aarch64_libbsd \
 	phytium_pi_aarch64_libbsd \
 	d2000_test_aarch64_libbsd \
 	ft2004_dsk_aarch64_libbsd \
-	qemu_a53_libbsd
+	pd2308_demo_libbsd \
+	pd2408_testa_libbsd
+
+all: all_bsp all_libbsd

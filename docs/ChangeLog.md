@@ -1,3 +1,17 @@
+# Phytium RTEMS SDK 2025-11-12 ChangeLog
+
+Change Log sinc 2024-09-26
+
+## rtems
+
+- sync with rtems 6.1 release
+- add PD2408 and PD2308 support
+
+## rtems-libbsd
+
+- sync with rtems libbsd 6-freebsd-14
+- add WLAN RTL8188EU support with FreeBSD net80211 stack
+
 # Phytium RTEMS SDK 2024-09-26 ChangeLog
 
 Change Log sinc init

@@ -10,14 +10,14 @@ e2000d_demo_aarch64_default:
 e2000d_demo_aarch64_config:
 	@echo "======Copy E2000D Demo BSP Parameters"
 	@mkdir $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000d -p
-	@cp $(RTEMS_STANDALONE)/soc/e2000/fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000d -f
-	@cp $(RTEMS_STANDALONE)/soc/e2000/d/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000d -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x//fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000d -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x/pe2202/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000d -f
 
 	@echo "======AARCH64 E2000D DEMO BSP"
 	$(call build_rtems_devtree,e2000d-demo-board)
 	$(call config_rtems_bsp,e2000d-demo-board-bsp.ini,$(RTEMS_SRC_DIR))
 
-e2000d_demo_aarch64_bsp: clean_config e2000d_demo_aarch64_config build_bsp
+e2000d_demo_aarch64_bsp: clean_config e2000d_demo_aarch64_config build_aarch64_bsp
 
 e2000d_demo_aarch64_libbsd:
 	@echo "======AARCH64 E2000D DEMO LIBBSD"
@@ -27,7 +27,7 @@ e2000d_demo_aarch64_example:
 	@echo "======AARCH64 E2000D DEMO Example"
 	@source ./tools/env_e2000d_demo_aarch64.sh && cd $(RTEMS_EXAMPLE_DIR) && ./waf clean && ./waf
 
-e2000d_demo_aarch64_clean:
+e2000d_demo_aarch64_clean: clean_bsp clean_libbsd
 	@rm $(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_e2000d_demo -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/build/aarch64-rtems6-phytium_e2000d_demo -rf
 

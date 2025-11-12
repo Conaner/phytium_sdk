@@ -10,7 +10,8 @@ CSRCS =  main.c \
 CSRCS += src/rtems_media.c \
 		 src/rtems_network.c \
 		 src/rtems_usb_mouse.c \
-		 src/rtems_usb_keyboard.c
+		 src/rtems_usb_keyboard.c \
+		 src/rtems_wlan.c
 
 COBJS = $(CSRCS:%.c=${ARCH}/%.o)
 
@@ -35,7 +36,7 @@ define bsp-link-c
 endef
 
 define default-bsp-post-link
-	$(OBJDUMP) -d $@ > $(basename $@).asm
+#	$(RTEMS_CPU)-rtems$(RTEMS_API)-objdump -D $@ > $(basename $@).asm
 	$(SIZE) $@
 endef
 

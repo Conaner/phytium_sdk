@@ -1,6 +1,14 @@
 # Phytium-RTEMS-SDK
 
-v1.0.0 [ReleaseNote](./docs/ChangeLog.md)
+v2.0.0 [ReleaseNote](./docs/ChangeLog.md)
+
+**如需Phytium全系CPU的软件适配支持和完整设备树，请联系** linan1284@phytium.com.cn
+
+[飞腾腾云S系列高性能服务器CPU](https://www.phytium.com.cn/homepage/production/list/0)
+
+[飞腾腾锐D系列高效能桌面CPU](https://www.phytium.com.cn/homepage/production/list/1)
+
+[飞腾腾珑E系列高端嵌入式CPU](https://www.phytium.com.cn/homepage/production/list/2)
 
 ## 1. 介绍
 
@@ -14,15 +22,17 @@ v1.0.0 [ReleaseNote](./docs/ChangeLog.md)
 
 | **芯片**      | **RTEMS 版本**  | **RTEMS (单核)** | **RTEMS (多核 SMP)** | **RTEMS-LibBSD** |
 | :-------------| :----------: | :-----------------: |  :-----------------: |  :-----------------|
-| E2000D(AARCH64 模式)        |     6.0     | 支持  | 支持  | 支持  |
-| E2000Q(AARCH64 模式)        |     6.0     | 支持  | 支持  | 支持  |
-| PhytiumPI(AARCH64 模式)        |     6.0     | 支持  | 支持  | 支持  |
-| D2000(AARCH64 模式)        |     6.0     | 支持  | 支持  | 支持  |
-| FT2000/4(AARCH64 模式)        |     6.0     | 支持  | 支持  | 支持  |
+| PD2408(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| PD2308(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| E2000D(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| E2000Q(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| PhytiumPI(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| D2000(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
+| FT2000/4(AARCH64 模式)        |     6.1     | 支持  | 支持  | 支持  |
 
 ## 2. 快速入门
 
-- 目前 SDK 支持在 Ubuntu 21.04 (x64)、WSL 1/2 Ubuntu/Debain 通过交叉编译构建 RTEMS 镜像 [Ubuntu x86_64/Windows WSL 快速入门](./docs/get-start/ubuntu_x64_setup.md)
+- 目前 SDK 支持在 Ubuntu 20.04 (x64)、WSL 1/2 Ubuntu/Debain 通过交叉编译构建 RTEMS 镜像 [Ubuntu x86_64/Windows WSL 快速入门](./docs/get-start/ubuntu_x64_setup.md)
 
 
 ## 3. 使用方法
@@ -63,6 +73,7 @@ v1.0.0 [ReleaseNote](./docs/ChangeLog.md)
 | USB HID/MSC        | E2000D <br>E2000Q <br>PHYTIUMPI | examples/rtems-libbsd           |
 | USB HID/MSC (in PCIe)        | E2000D <br>E2000Q <br>PHYTIUMPI<br> D2000 <br> FT2000/4| examples/rtems-libbsd           |
 | NVMe FileSystem (in PCIe)       | E2000D <br>E2000Q <br>PHYTIUMPI | examples/rtems-libbsd           |
+| WLAN (RTL8188EU in USB)       | E2000D <br>E2000Q <br>PHYTIUMPI | examples/rtems-libbsd           |
 
 ## 5. 参考资料
 

@@ -53,6 +53,10 @@
 #include <rtems/bsd/bsd.h>
 #include <rtems/bsd/modules.h>
 
+#if defined(RTEMS_BSD_MODULE_NET80211)
+#include <rtems/dhcpcd.h>
+#endif
+
 int main(int argc, char **argv);
 
 rtems_status_code media_initialization(void);
@@ -62,6 +66,10 @@ rtems_status_code usb_mouse_initialization(void);
 rtems_status_code usb_mouse_configuration(void);
 rtems_status_code usb_keyboard_initialization(void);
 rtems_status_code usb_keyboard_configuration(void);
+int wlan_wait_for_link_up(void);
+void wlan_create_wpa_supplicant_conf(void);
+rtems_status_code wlan_create_dev(void);
+rtems_status_code wlan_init_wpa_supplicant(void);
 
 static rtems_status_code early_initialization(void)
 {
@@ -70,14 +78,18 @@ static rtems_status_code early_initialization(void)
     sc = media_initialization();
     assert(sc == RTEMS_SUCCESSFUL);
 
+#if defined(RTEMS_BSD_MODULE_DEV_NET)
     sc = network_initialization();
     assert(sc == RTEMS_SUCCESSFUL);
+#endif /* RTEMS_BSD_MODULE_DEV_NET */
 
+#if defined(RTEMS_BSD_MODULE_DEV_USB_INPUT)
     sc = usb_mouse_initialization();
     assert(sc == RTEMS_SUCCESSFUL);
 
     sc = usb_keyboard_initialization();
     assert(sc == RTEMS_SUCCESSFUL);
+#endif /* RTEMS_BSD_MODULE_DEV_USB_INPUT */
 
     return sc;
 }
@@ -86,14 +98,35 @@ static rtems_status_code later_initialization(void)
 {
     rtems_status_code sc;
 
+#if defined(RTEMS_BSD_MODULE_DEV_NET)
     sc = network_configuration();
     assert(sc == RTEMS_SUCCESSFUL);
+#endif /* RTEMS_BSD_MODULE_DEV_NET */
 
+#if defined(RTEMS_BSD_MODULE_DEV_USB_INPUT)
     sc = usb_mouse_configuration();
     assert(sc == RTEMS_SUCCESSFUL);
 
     sc = usb_keyboard_configuration();
     assert(sc == RTEMS_SUCCESSFUL);
+#endif /* RTEMS_BSD_MODULE_DEV_USB_INPUT */
+
+	/* Let the callout timer allocate its resources */
+	sc = rtems_task_wake_after(10);
+	assert(sc == RTEMS_SUCCESSFUL);
+
+#if defined(RTEMS_BSD_MODULE_NET80211)
+    if (wlan_create_dev() == RTEMS_SUCCESSFUL)
+    {
+        wlan_create_wpa_supplicant_conf();
+
+        sc = rtems_dhcpcd_start(NULL);
+        assert(sc == RTEMS_SUCCESSFUL);
+
+        sc = wlan_init_wpa_supplicant();
+        assert(sc == RTEMS_SUCCESSFUL);
+    }
+#endif
 
     return sc;
 }
@@ -113,6 +146,15 @@ static void show_platforminfo(void)
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++\r\n");
 }
 
+static void
+default_set_self_prio(rtems_task_priority prio)
+{
+    rtems_status_code sc;
+
+    sc = rtems_task_set_priority(RTEMS_SELF, prio, &prio);
+    assert(sc == RTEMS_SUCCESSFUL);
+}
+
 static void Init(rtems_task_argument arg)
 {
     rtems_status_code sc;
@@ -130,7 +172,10 @@ static void Init(rtems_task_argument arg)
     sc = later_initialization();
     assert(sc == RTEMS_SUCCESSFUL);
 
-    sc = rtems_shell_init("SHLL", 32 * 1024, 200,
+	/* Let UI1 Init task has lower priority to act as background task */
+	default_set_self_prio(RTEMS_MAXIMUM_PRIORITY - 1U);
+
+    sc = rtems_shell_init("SHLL", 32 * 1024, 150,
                           CONSOLE_DEVICE_NAME,
                           false,
                           true,
@@ -140,6 +185,7 @@ static void Init(rtems_task_argument arg)
     exit(0);
 }
 
+#ifdef CONFIGURE_POSIX_INIT_THREAD_TABLE
 static void *POSIX_Init(void *arg)
 {
     (void)arg; /* deliberately ignored */
@@ -155,6 +201,7 @@ static void *POSIX_Init(void *arg)
 
     return NULL;
 }
+#endif
 
 #define CONFIGURE_MICROSECONDS_PER_TICK 1000
 #define CONFIGURE_MAXIMUM_PROCESSORS    8
@@ -164,8 +211,6 @@ static void *POSIX_Init(void *arg)
 #define CONFIGURE_APPLICATION_NEEDS_STUB_DRIVER
 #define CONFIGURE_APPLICATION_NEEDS_ZERO_DRIVER
 #define CONFIGURE_APPLICATION_NEEDS_LIBBLOCK
-
-#define CONFIGURE_POSIX_INIT_THREAD_TABLE
 
 #define CONFIGURE_MAXIMUM_DRIVERS 32
 
@@ -182,7 +227,7 @@ static void *POSIX_Init(void *arg)
 
 #define CONFIGURE_BDBUF_BUFFER_MAX_SIZE (512 * 1024)
 #define CONFIGURE_BDBUF_MAX_WRITE_BLOCKS 1024
-#define CONFIGURE_BDBUF_MAX_READ_AHEAD_BLOCKS 4
+#define CONFIGURE_BDBUF_MAX_READ_AHEAD_BLOCKS 0
 #define CONFIGURE_BDBUF_CACHE_MEMORY_SIZE (512 * 1024)
 #define CONFIGURE_SWAPOUT_TASK_PRIORITY 105
 #define CONFIGURE_SWAPOUT_WORKER_TASK_PRIORITY  105
@@ -190,20 +235,14 @@ static void *POSIX_Init(void *arg)
 
 #define CONFIGURE_RTEMS_INIT_TASKS_TABLE
 
-#define CONFIGURE_INIT_TASK_STACK_SIZE (32 * 1024)
+#define CONFIGURE_INIT_TASK_STACK_SIZE  (256 * 1024)
 #define CONFIGURE_INIT_TASK_INITIAL_MODES RTEMS_DEFAULT_MODES
 #define CONFIGURE_INIT_TASK_ATTRIBUTES RTEMS_FLOATING_POINT
 
 #define CONFIGURE_INIT
-
 #include <rtems/confdefs.h>
 
 #include <bsp/nexus-devices.h>
-SYSINIT_REFERENCE(usb_quirk_init);
-SYSINIT_DRIVER_REFERENCE(uhub, usbus);
-SYSINIT_DRIVER_REFERENCE(umass, uhub);
-SYSINIT_DRIVER_REFERENCE(ukbd, uhub);
-SYSINIT_DRIVER_REFERENCE(ums, uhub);
 
 #define CONFIGURE_SHELL_COMMANDS_INIT
 
@@ -234,8 +273,10 @@ SYSINIT_DRIVER_REFERENCE(ums, uhub);
 
 #ifdef RTEMS_BSD_MODULE_USR_SBIN_WPA_SUPPLICANT
   #define SHELL_WPA_SUPPLICANT_COMMAND &rtems_shell_WPA_SUPPLICANT_Command,
+  #define SHELL_WPA_SUPPLICANT_FOR_COMMAND &rtems_shell_WPA_SUPPLICANT_FORK_Command, 
 #else
   #define SHELL_WPA_SUPPLICANT_COMMAND
+  #define SHELL_WPA_SUPPLICANT_FOR_COMMAND
 #endif
 
 extern rtems_shell_cmd_t rtems_shell_emmc_Command;
@@ -243,9 +284,10 @@ extern rtems_shell_cmd_t rtems_shell_emmc_Command;
 #define CONFIGURE_SHELL_USER_COMMANDS \
     SHELL_WLANSTATS_COMMAND \
     SHELL_WPA_SUPPLICANT_COMMAND \
+    SHELL_WPA_SUPPLICANT_FOR_COMMAND \
     &bsp_interrupt_shell_command,     \
     &rtems_shell_SYSCTL_Command,      \
-	  &rtems_shell_BLKSTATS_Command,    \
+	&rtems_shell_BLKSTATS_Command,    \
     &rtems_shell_ARP_Command, \
     &rtems_shell_HOSTNAME_Command, \
     &rtems_shell_PING_Command, \

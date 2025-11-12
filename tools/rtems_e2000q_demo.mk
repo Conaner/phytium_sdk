@@ -10,24 +10,28 @@ e2000q_demo_aarch64_default:
 e2000q_demo_aarch64_config:
 	@echo "======Copy E2000Q Demo BSP Parameters"
 	@mkdir $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000q -p
-	@cp $(RTEMS_STANDALONE)/soc/e2000/fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000q -f
-	@cp $(RTEMS_STANDALONE)/soc/e2000/q/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000q -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x/fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000q -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x/pe2204/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/e2000q -f
 
 	@echo "======AARCH64 E2000Q DEMO BSP"
 	$(call build_rtems_devtree,e2000q-demo-board)
 	$(call config_rtems_bsp,e2000q-demo-board-bsp.ini,$(RTEMS_SRC_DIR))
 
-e2000q_demo_aarch64_bsp: clean_config e2000q_demo_aarch64_config build_bsp
+e2000q_demo_aarch64_bsp: clean_config e2000q_demo_aarch64_config build_aarch64_bsp
 
 e2000q_demo_aarch64_libbsd:
 	@echo "======AARCH64 E2000Q DEMO LIBBSD"
 	$(call build_rtems_libbsd,$(RTEMS_AARCH64_TOOL_PREFIX),$(RTEMS_LIBBSD_DIR),$(RTEMS_VERSION),aarch64,phytium_e2000q_demo,e2000q-demo-board-libbsd.ini)
 
+e2000q_demo_aarch64_fio:
+	@echo "======AARCH64 E2000Q DEMO FIO"
+	$(call build_rtems_fio,$(RTEMS_SDK_DIR)/third-party/fio,$(RTEMS_AARCH64_TOOL_PREFIX)/bin/aarch64-rtems6-,$(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_e2000q_demo)
+	
 e2000q_demo_aarch64_example:
 	@echo "======AARCH64 E2000Q DEMO Example"
 	@source ./tools/env_e2000q_demo_aarch64.sh && cd $(RTEMS_EXAMPLE_DIR) && ./waf clean && ./waf
 
-e2000q_demo_aarch64_clean:
+e2000q_demo_aarch64_clean: clean_bsp clean_libbsd
 	@rm $(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_e2000q_demo -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/build/aarch64-rtems6-phytium_e2000q_demo -rf
 

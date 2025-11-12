@@ -37,7 +37,7 @@ rtems_sdk_path = install_path
 print("RTEMS SDK at {}".format(rtems_sdk_path))
 
 # STEP 2: Add standalone sdk
-standalone_sdk_v="e3ce67ce6748bba3e1a432b0c61572977483eca9"
+standalone_sdk_v="99a24f246c1a623fce2e2de82d183342d7fe154c"
 if (install_platform == windows_x64):
     standalone_path=rtems_sdk_path  + '\\standalone'
 else:
@@ -46,8 +46,6 @@ standalone_branch="master"
 standalone_remote="https://gitee.com/phytium_embedded/phytium-standalone-sdk.git"
 
 if not os.path.exists(standalone_path):
-    current_path = os.getcwd()
-
     os.system("git clone -b {} {} {}".format(standalone_branch, standalone_remote,standalone_path))
     os.chdir(standalone_path)# 切换工作路径至standalone 路径
     os.system("git config core.sparsecheckout true")
@@ -67,7 +65,7 @@ if not os.path.exists(standalone_path):
                                        /tools \
                                        /soc")
 
-    #os.system("git checkout {}".format(standalone_sdk_v))
+    os.system("git checkout {}".format(standalone_sdk_v))
     print('Standalone sdk download is succeed')
 else:
     print('Standalone sdk is exist')
@@ -79,12 +77,12 @@ if (install_platform == windows_x64):
 else:
     rtems_path=rtems_sdk_path  + '/rtems/rtems'
 rtems_remote = "https://gitee.com/phytium_embedded/rtems.git"
-rtems_commit = "6b0d1c4d90eade5d5707898ea1f83fddad68e3cb"
-rtems_branch = "main"
+rtems_commit = "c2527a69a6d1e75c3a7a689e02ad5f53dadaf906"
+rtems_branch = "6"
 
 if not os.path.exists(rtems_path):
-    current_path = os.getcwd()
-
+    os.chdir(rtems_sdk_path)
+    os.chdir(rtems_sdk_path)
     os.system("git clone -b {} {} {}".format(rtems_branch, rtems_remote, rtems_path))
     os.chdir(rtems_path)# 切换工作路径至 rtems 路径
     os.system("git checkout {}".format(rtems_commit))
@@ -99,12 +97,12 @@ if (install_platform == windows_x64):
 else:
     rtems_libbsd_path=rtems_sdk_path  + '/rtems/rtems-libbsd'
 rtems_libbsd_remote = "https://gitee.com/phytium_embedded/rtems-libbsd.git"
-rtems_libbsd_commit = "2f39be5b39aa16ece3445004810ae749335a8e62"
-rtems_libbsd_branch = "main"
+rtems_libbsd_commit = "586ee8349fd192a8c3c37f9be9e6ce499bbe75dd"
+rtems_libbsd_branch = "6-freebsd-14"
 
 if not os.path.exists(rtems_libbsd_path):
-    current_path = os.getcwd()
-
+    os.chdir(rtems_sdk_path)
+    os.chdir(rtems_sdk_path)
     os.system("git clone -b {} {} {}".format(rtems_libbsd_branch, rtems_libbsd_remote, rtems_libbsd_path))
     os.chdir(rtems_libbsd_path)# 切换工作路径至 rtems 路径
     os.system("git checkout {}".format(rtems_libbsd_commit))
@@ -120,12 +118,12 @@ if (install_platform == windows_x64):
 else:
     rtems_rsb_path=rtems_sdk_path  + '/rtems/rtems-source-builder'
 rtems_rsb_remote = "https://gitlab.rtems.org/rtems/tools/rtems-source-builder.git"
-rtems_rsb_commit = "46a5bfdc3fc95d503a63f9bee515e73d9198aa71"
-rtems_rsb_branch = "main"
+rtems_rsb_commit = "b1aec32059aa0e86385ff75ec01daf93713fa382"
+rtems_rsb_branch = "6"
 
 if not os.path.exists(rtems_rsb_path):
-    current_path = os.getcwd()
-
+    os.chdir(rtems_sdk_path)
+    os.chdir(rtems_sdk_path)
     os.system("git clone -b {} {} {}".format(rtems_rsb_branch, rtems_rsb_remote, rtems_rsb_path))
     os.chdir(rtems_rsb_path)# 切换工作路径至 rtems 路径
     os.system("git checkout {}".format(rtems_rsb_commit))
@@ -140,12 +138,12 @@ if (install_platform == windows_x64):
 else:
     rtems_eg_path=rtems_sdk_path  + '/rtems/rtems-examples'
 rtems_eg_remote = "https://gitlab.rtems.org/rtems/rtos/rtems-examples.git"
-rtems_eg_commit = "2438af24e0027746c5601386b0776a2b11eb9e6a"
-rtems_eg_branch = "main"
+rtems_eg_commit = "bca39c20c4366c7ce5ffb0e9ceead722edb94f26"
+rtems_eg_branch = "6"
 
 if not os.path.exists(rtems_eg_path):
-    current_path = os.getcwd()
-
+    os.chdir(rtems_sdk_path)
+    os.chdir(rtems_sdk_path)
     os.system("git clone -b {} {} {}".format(rtems_eg_branch, rtems_eg_remote, rtems_eg_path))
     os.chdir(rtems_eg_path)# 切换工作路径至 rtems 路径
     os.system("git checkout {}".format(rtems_eg_commit))

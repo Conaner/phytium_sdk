@@ -1,6 +1,7 @@
-/* SPDX-License-Identifier: BSD-2-Clause */
 /*
- * Copyright (C) 2024 Phytium Technology Co., Ltd.
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (C) 2024 Phytium Technology Co., Ltd. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,14 +24,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
- * FilePath: fdrivers_port.c
- * Created Date: 2023-10-27 17:02:35
- * Last Modified: 2023-10-27 09:22:20
- * Description:  This file is for board layer code decoupling
- *
- * Modify History:
- *  Ver      Who        Date               Changes
- * -----  ----------  --------  ---------------------------------
- *  1.0     zhugengyu  2024/08/20    first release
+ * Modify History:
+ *  Ver   Who        Date         Changes
+ * ----- ------     --------    --------------------------------------
+ * 1.0   zhugengyu  2025/05/06    init commit
  */
+
+#ifndef _PHYTIUM_SDIF_BM_H_
+#define _PHYTIUM_SDIF_BM_H_
+
+#ifdef __rtems__
+#include <phytium/fsdif.h>
+#include <phytium/fsdif_hw.h>
+#include <phytium/fsdif_timing.h>
+#else
+#include "fdrivers_port.h"
+#include "fsdif.h"
+#include "fsdif_hw.h"
+#endif
+
+#undef max
+#undef min
+#undef ALIGN
+#undef rounddown
+#undef roundup
+#undef UL
+
+#endif

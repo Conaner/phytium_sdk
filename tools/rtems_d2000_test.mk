@@ -10,13 +10,13 @@ d2000_test_aarch64_default:
 d2000_test_aarch64_config:
 	@echo "======Copy D2000 Test BSP Parameters"
 	@mkdir $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/d2000 -p
-	@cp $(RTEMS_STANDALONE)/soc/d2000/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/d2000 -f
+	@cp $(RTEMS_STANDALONE)/soc/pd2008/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/d2000 -f
 
 	@echo "======AARCH64 D2000 Test BSP"
 	$(call build_rtems_devtree,d2000-test-board)
 	$(call config_rtems_bsp,d2000-test-board-bsp.ini,$(RTEMS_SRC_DIR))
 
-d2000_test_aarch64_bsp: clean_config d2000_test_aarch64_config build_bsp
+d2000_test_aarch64_bsp: clean_config d2000_test_aarch64_config build_aarch64_bsp
 
 d2000_test_aarch64_libbsd:
 	@echo "======AARCH64 D2000 Test LIBBSD"
@@ -26,7 +26,7 @@ d2000_test_aarch64_example:
 	@echo "======AARCH64 D2000 Test Example"
 	@source ./tools/env_d2000_test_aarch64.sh && cd $(RTEMS_EXAMPLE_DIR) && ./waf clean && ./waf
 
-d2000_test_aarch64_clean:
+d2000_test_aarch64_clean: clean_bsp clean_libbsd
 	@rm $(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_d2000_test -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/build/aarch64-rtems6-phytium_d2000_test -rf
 

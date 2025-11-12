@@ -10,14 +10,14 @@ phytium_pi_aarch64_default:
 phytium_pi_aarch64_config:
 	@echo "======Copy Phytium PI BSP Parameters"
 	@mkdir $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/phytiumpi -p
-	@cp $(RTEMS_STANDALONE)/soc/phytiumpi/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/phytiumpi -f
-	@cp $(RTEMS_STANDALONE)/soc/phytiumpi/fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/phytiumpi -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x/pe2204/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/phytiumpi -f
+	@cp $(RTEMS_STANDALONE)/soc/pe220x/fparameters_comm.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/phytiumpi -f
 
 	@echo "======AARCH64 Phytium PI BSP"
 	$(call build_rtems_devtree,phytium-pi)
 	$(call config_rtems_bsp,phytium-pi-bsp.ini,$(RTEMS_SRC_DIR))
 
-phytium_pi_aarch64_bsp: clean_config phytium_pi_aarch64_config build_bsp
+phytium_pi_aarch64_bsp: clean_config phytium_pi_aarch64_config build_aarch64_bsp
 
 phytium_pi_aarch64_libbsd:
 	@echo "======AARCH64 Phytium PI LIBBSD"
@@ -27,7 +27,7 @@ phytium_pi_aarch64_example:
 	@echo "======AARCH64 Phytium PI Example"
 	@source ./tools/env_phytium_pi_aarch64.sh && cd $(RTEMS_EXAMPLE_DIR) && ./waf clean && ./waf
 
-phytium_pi_aarch64_clean:
+phytium_pi_aarch64_clean: clean_bsp clean_libbsd
 	@rm $(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_pi -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/build/aarch64-rtems6-phytium_pi -rf
 

@@ -931,8 +931,11 @@ int debug_print(int level, const char* format, ...)
       printf_(DBG_COLOR_YELLOW "[WARN] ");
       break;
     case DBG_LOG:
-      printf_(DBG_COLOR_WHITE "[LOGI] ");
+      printf_(DBG_COLOR_WHITE "[DBUG] ");
       break;
+    case DBG_VERBOSE:
+      printf_(DBG_COLOR_WHITE "[VBOS] ");
+      break;      
     default:
       printf_(DBG_COLOR_RESET "[UNKN] ");
       break;

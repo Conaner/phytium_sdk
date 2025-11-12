@@ -10,6 +10,8 @@
 - 此例程已在 Phytium PI 上完成测试
 - 此例程已在 FT2004 DSK 上完成测试
 - 此例程已在 D2000 TEST 上完成测试
+- 此例程已在 PD2408 TEST A 上完成测试
+- 此例程已在 PD2308 Demo 上完成测试
 
 ## 2. 如何使用例程
 
@@ -17,13 +19,14 @@
 
 本例程需要以下硬件，
 
-- E2000D/Q Demo/ Phytium PI/ FT2004 DSK/ D2000 TEST板
+- E2000D/Q Demo/ Phytium PI/ FT2004 DSK/ D2000 TEST/ PD2408 TEST A板
 - 串口线和串口上位机
 - MicroSD 卡
 - XHCI PCIe 卡
 - USB 3.x Hub, USB 2.x Hub
 - 键盘、鼠标、U 盘
 - NVMe 硬盘
+- RTL8188EU USB WLAN 卡
 - 网线
 
 
@@ -46,6 +49,10 @@
 - - 6. 通过 SD 1 连接 MicroSD 卡
 - - 7. 通过 XHCI 0 （支持 3.x 速率） 连接 USB 3.x Hub，再连接 USB 3.x U 盘
 - - 8. 通过 XHCI 1 （支持 2.x 速率） 连接 USB 2.x Hub, 再连接键盘鼠标
+
+![wlan](./figs/wlan.png)
+
+- - 9. 通过 XHCI 0  或 USB Hub 连接 WLAN 卡 （RTL8188EU）
 
 - 实际测试过程中，连接以上全部的外设或者只连接其中部分的外设都可以进行相应的测试
 
@@ -132,6 +139,24 @@ make d2000_test_aarch64_bsp
 make d2000_test_aarch64_libbsd
 ```
 
+#### 2.1.6 PD2308 Demo
+
+- 在 SDK 根目录编译 PD2308 Demo 的 BSP 和 LibBSD
+
+```
+make pd2308_demo_bsp
+make pd2308_demo_libbsd
+```
+
+#### 2.1.7 PD2408 TEST A
+
+- 在 SDK 根目录编译 PD2408 TEST A 的 BSP 和 LibBSD
+
+```
+make pd2408_testa_bsp
+make pd2408_testa_libbsd
+```
+
 ### 2.3 构建和下载
 
 ><font size="1">描述构建、烧录下载镜像的过程，列出相关的命令</font><br />
@@ -168,6 +193,18 @@ source tools/env_ft2004_dsk_aarch64.sh
 source tools/env_d2000_test_aarch64.sh
 ```
 
+> 对于 PD2308 Demo，在 SDK 根目录下输入
+
+```
+source tools/env_pd2308_demo.sh
+```
+
+> 对于 PD2408 TEST A，在 SDK 根目录下输入
+
+```
+source tools/env_pd2408_testa.sh
+```
+
 ![选择目标平台 BSP](./figs/select_target_bsp.png)
 
 - 随后在当前 Shell 终端下进入例程，编译镜像
@@ -186,6 +223,9 @@ make clean image
 ![构建镜像](./figs/build_apps.png)
 
 - 通过 tftpboot 将编译生成的镜像上传到开发板上
+
+#### 2.3.1 开发板固件是 U-Boot 
+
 - 如果是加载 elf 镜像 （编译输出的 *.exe 文件）
 
 ```
@@ -213,6 +253,30 @@ go 0x80100000
 
 > 部分固件可能没有命令 `dcache flush`，可以先尝试不 flush dcache 启动，如果启动失败的话需要联系 FAE 更换支持命令 `dcache flush`的固件
 
+#### 2.3.2 开发板固件是 UEFI 
+
+- 首先参考《UEFI启动RTOS使用手册v2.0》制作 UEFI 下启动 RTOS 的启动盘，然后引导进入 GRUB 界面，输入下面的命令加载启动 RTEMS 镜像
+
+- 如果是加载 elf 镜像 （编译输出的 *.exe 文件）
+
+```
+net_add_addr tftp efinet0 192.168.4.20
+net_add_route tftp 192.168.4.30 tftp
+loadelf (tftp,192.168.4.30)/rtems.exe
+boot
+```
+
+- 如果是加载 bin 镜像
+
+```
+net_add_addr tftp efinet0 192.168.4.20
+net_add_route tftp 192.168.4.30 tftp
+loadbin (tftp,192.168.4.30)/rtems.bin 0x80100000
+boot
+```
+
+> 注意 E2000 UBOOT 和 UEFI 的默认启动核心可能不同，需要保证 Phytium BSP 中 bspcpuinfo.c 中的核心配置和实际情况一致才能启动成功
+
 ### 2.4 输出与实验现象
 
 ><font size="1">描述输入输出情况，列出存在哪些输出，对应的输出是什么（建议附录相关现象图片）</font><br />
@@ -232,12 +296,34 @@ go 0x80100000
 ##### eMMC
 
 - 启动过程中应该可以看到 SD 0 控制器的初始化信息
+> E2000 eMMC 运行在 100MHz/66MHz 时可能需要调整引脚时序，可以在启动镜像前输入 `mw.l 0x32b31120 0x1f00;`
 
 ![初始化 SD0](./figs/init_sd0.png)
 
 - SD 0 板载连接的 eMMC 应该也可以识别，形成设备实例 /dev/mmcsd-0，如果 eMMC 上存在 FAT32 文件系统，可以看到 media listener 自动挂载文件系统到 /media/mmcsd-0 目录的过程
 
 ![识别 eMMC 卡](./figs/detect_emmc.png)
+
+- 手动格式化和挂载 eMMC/SD卡
+
+```
+# 将块设备 /dev/mmcsd-0 格式化成 FAT32 格式
+mkdos -V mmcsd0 -s 128 /dev/mmcsd-0
+
+# 将格式化后的块设备挂载到目录 /media/mmcsd-0
+mkdir -p /media/mmcsd-0
+mount -t dosfs /dev/mmcsd-0 /media/mmcsd-0
+
+# 读写文件系统
+cd /media/mmcsd-0
+time dd if=/dev/zero of=./image bs=1M count=10
+time dd if=./image of=/dev/null bs=1M count=10
+
+# 卸载文件系统
+unmount /media/mmcsd-0
+```
+
+> RTEMS 的 FAT32 文件系统最多只支持单次读写 128 块数据，因此读写速度达不到最快 
 
 ##### XMAC
 
@@ -249,14 +335,14 @@ go 0x80100000
 
 ![配置 IP 和服务](./figs/config_ip.png)
 
-- 之后可以在串口终端查看网口的配置，默认地，开发板 ip 是 192.168.4.20，对端的 ip 是 192.168.4.30，相关的默认配置可以通过 configs/netconf 中对应平台的配置文件修改，也可以通过 ifconfig 命令手动修改
+- 之后可以在串口终端查看网口的配置，默认地，开发板 ip 是 192.168.4.20，对端的 ip 是 192.168.4.50，相关的默认配置可以通过 configs/netconf 中对应平台的配置文件修改，也可以通过 ifconfig 命令手动修改
 
 ![IP 配置](./figs/ifconfig.png)
 
 - 首先可以尝试从开发板侧 ping 对端主机
 
 ```
-ping -c 20 192.168.4.30
+ping -c 20 192.168.4.50
 ```
 
 ![Ping PC](./figs/ping_pc.png)
@@ -282,7 +368,7 @@ telnet 192.168.4.20 23
 - 可以通过 ifconfig 手动修改 IP 地址，
 
 ```
-ifconfig cgem0 192.168.4.10 netmask 255.255.255.0 up
+ifconfig xmac0 192.168.4.10 netmask 255.255.255.0 up
 ```
 
 ![重新配置 ip](./figs/recofig_ip.png)
@@ -342,6 +428,28 @@ df -h
 reset
 ```
 
+#### WLAN RTL8188EU (XHCI)
+
+- 在 rtems_wlan.c 的 wlan_create_wpa_supplicant_conf 中指定需要连接的 WLAN 热点和连接密码，默认是 SSID=phytium_net WPA-PSK=phytium-net
+
+- 启动过程中可以看到 RTL8188EU 的识别信息
+
+![rtl8188eu](./figs/rtl8188eu.png)
+
+- 启动后查看无线网卡的连接情况
+
+```
+ifconfig wlan0
+```
+
+![ifconfig_wlan0](./figs/ifconfig_wlan0.png)
+
+- 和 WLAN 局域网内的的其它主机互 ping
+
+![ping_wlan0](./figs/ping_wlan0.png)
+
+![wlan0_ping](./figs/wlan0_ping.png)
+
 #### 2.4.2 PhytiumPI
 
 ##### Micro SD
@@ -364,7 +472,7 @@ reset
 
 ![XMAC 初始化](./figs/phytiumpi_init_xmac.png)
 
-- 两个网口对应 cgem0 和 cgem1 设备实例
+- 两个网口对应 xmac0 和 xmac1 设备实例
 
 ![XMAC 配置](./figs/phytiumpi_ifconfig.png)
 
@@ -385,11 +493,85 @@ reset
 
 #### 2.4.4 D2000 TEST
 
+##### GMAC
+
+- 启动过程中可以看到网卡初始化
+
+![d2000_gmac_phy](./figs/d2000_gmac_phy.jpg)
+
+![d2000_gmac](./figs/d2000_gmac.png)
+
+- 使用 ifconfig 查看网卡信息
+
+![d2000_gmac_ping](./figs/d2000_gmac_ping.png)
+
 ##### XHCI（PCIe）
 
 - 启动过程中可以看到 PCI XHCI 控制器初始化
 
 ![pcie_xhci](./figs/d2000_pcie_xhci.png)
+
+#### 2.4.5 PD2308 DEMO
+
+##### SD
+
+- 启动过程可以看到识别的 SD 卡
+
+![pd2308_sd](./figs/pd2308_sd.png)
+
+##### XMAC
+
+- 启动后可以看到网卡设备
+
+![pd2308_xmac](./figs/pd2308_xmac.png)
+
+##### XHCI
+
+- 启动后可以看到 PCIe XHCI 控制器上挂载的 USB 设备
+
+![pd2308_xhci](./figs/pd2308_xhci.png)
+
+#### 2.4.6 PD2408 TEST
+
+##### eMMC
+
+- 启动过程可以看到识别到 eMMC 设备
+
+![pd2408_mmc](./figs/pd2408_mmc.png)
+
+![pd2408_emmc](./figs/pd2408_emmc.png)
+
+- 格式化 eMMC 然后挂载文件系统
+
+```
+# 将块设备 /dev/mmcsd-0 格式化成 FAT32 格式
+mkdos -V mmcsd0 -s 128 /dev/mmcsd-0
+
+# 将格式化后的块设备挂载到目录 /media/mmcsd-0
+mkdir -p /media/mmcsd-0
+mount -t dosfs /dev/mmcsd-0 /media/mmcsd-0
+
+# 读写文件系统
+cd /media/mmcsd-0
+time dd if=/dev/zero of=./image bs=1M count=100
+time dd if=./image of=/dev/null bs=1M count=100
+
+# 卸载文件系统
+unmount /media/mmcsd-0
+```
+
+![pd2408_emmc_format](./figs/pd2408_emmc_format.png)
+
+##### XMAC MSG
+
+- 启动过程中可以看到网卡设备的初始化信息
+
+![pd2408_xmac_init](./figs/pd2408_xmac_init.png)
+
+- 启动完成后可以查看网卡信息
+
+![pd2408_xmac_msg](./figs/pd2408_xmac_msg.png)
+
 
 ## 3. 如何解决问题
 

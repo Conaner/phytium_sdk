@@ -57,14 +57,23 @@
 #include <rtems/stackchk.h>
 #include <rtems/bsd/bsd.h>
 #include <rtems/bsd/modules.h>
+#include <rtems/bsd/iface.h>
 #include <rtems/dhcpcd.h>
 #include <rtems/telnetd.h>
+
+#if defined(RTEMS_BSD_MODULE_DEV_NET) && (RTEMS_BSD_MODULE_DEV_NET)
 
 /* Configure network interface */
 #if defined(PHYTIUM_BSP_TYPE_E2000D_DEMO) || \
     defined(PHYTIUM_BSP_TYPE_E2000Q_DEMO) || \
-    defined(PHYTIUM_BSP_TYPE_PHYTIUM_PI)
-#define NET_CFG_INTERFACE_0 "cgem0"
+    defined(PHYTIUM_BSP_TYPE_PHYTIUM_PI) || \
+    defined(PHYTIUM_BSP_TYPE_PD2308_DEMO)
+#define NET_CFG_INTERFACE_0 "xmac0"
+#elif defined(PHYTIUM_BSP_TYPE_PD2408_TESTA)
+#define NET_CFG_INTERFACE_0 "xmac_msg0"
+#elif defined(PHYTIUM_BSP_TYPE_D2000_TEST) || \
+    defined(PHYTIUM_BSP_TYPE_FT2004_DSK)
+#define NET_CFG_INTERFACE_0 "gmac0"
 #else
 #define NET_CFG_INTERFACE_0 "lo0"
 #endif
@@ -92,15 +101,6 @@
 #include <rtems/console.h>
 #include <rtems/shell.h>
 #endif
-
-static void
-default_network_set_self_prio(rtems_task_priority prio)
-{
-    rtems_status_code sc;
-
-    sc = rtems_task_set_priority(RTEMS_SELF, prio, &prio);
-    assert(sc == RTEMS_SUCCESSFUL);
-}
 
 #ifndef DEFAULT_NETWORK_NO_INTERFACE_0
 static void
@@ -232,10 +232,27 @@ rtems_status_code network_initialization(void)
 
     on_exit(default_network_on_exit, NULL);
 
-	/* Let other tasks run to complete background work */
-	default_network_set_self_prio(RTEMS_MAXIMUM_PRIORITY - 1U);
-
     return sc;
+}
+
+
+static void
+default_wait_for_link_up( const char *name )
+{
+	size_t seconds = 0;
+	while ( true ) {
+		bool link_active = false;
+		assert(rtems_bsd_iface_link_state( name, &link_active ) == 0);
+		if (link_active) {
+			return;
+		}
+		sleep( 1 );
+		++seconds;
+		if (seconds > 10) {
+			printf("error: %s: no active link\n", name);
+			assert(seconds < 10);
+		}
+	}
 }
 
 rtems_status_code network_configuration(void)
@@ -257,10 +274,6 @@ rtems_status_code network_configuration(void)
 #endif
 #endif
 
-	/* Let the callout timer allocate its resources */
-	sc = rtems_task_wake_after(2);
-	assert(sc == RTEMS_SUCCESSFUL);
-
 	rtems_bsd_ifconfig_lo0();
 #ifndef DEFAULT_NETWORK_NO_INTERFACE_0
     printf("ifname = %s \n", ifname);
@@ -269,8 +282,12 @@ rtems_status_code network_configuration(void)
 #endif
 	default_network_dhcpcd();
 
+    default_wait_for_link_up(ifname);
+
 	sc = rtems_telnetd_initialize();
 	assert(sc == RTEMS_SUCCESSFUL);
 
     return sc;
 }
+
+#endif /* RTEMS_BSD_MODULE_DEV_NET */

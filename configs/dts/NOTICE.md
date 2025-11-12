@@ -1,0 +1,1 @@
+**如需Phytium全系CPU的软件适配支持和完整设备树，请联系** linan1284@phytium.com.cn

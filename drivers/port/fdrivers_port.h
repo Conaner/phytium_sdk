@@ -40,7 +40,11 @@
 
 #include <rtems/score/cpu.h>
 
+#include "ftypes.h"
+#include "ferror_code.h"
+#include "fio.h"
 #include "fkernel.h"
+#include "fassert.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -73,6 +77,7 @@ void FDriverSdelay(uint32_t sec);
 #define DBG_INFO        2
 #define DBG_WARNING     3
 #define DBG_LOG         4
+#define DBG_VERBOSE     5
 
 #define DBG_COLOR_RESET     "\033[0m"
 #define DBG_COLOR_RED       "\033[31m"
@@ -109,12 +114,26 @@ int debug_print(int level, const char* format, ...);
 #define FT_DEBUG_PRINT_D(TAG, format, ...)
 #endif
 
+#if (DBG_LEVEL >= DBG_VERBOSE)
+#define FT_DEBUG_PRINT_V(TAG, format, ...) debug_print(DBG_VERBOSE, format, ##__VA_ARGS__)
+#else
+#define FT_DEBUG_PRINT_V(TAG, format, ...)
+#endif
+
 #else
 #define FT_DEBUG_PRINT_W(TAG, format, ...)
 #define FT_DEBUG_PRINT_I(TAG, format, ...)
 #define FT_DEBUG_PRINT_E(TAG, format, ...)
 #define FT_DEBUG_PRINT_D(TAG, format, ...)
 #endif
+
+void FtDumpHexWord(const u32 *ptr, u32 buflen);
+
+/* libc utilies */
+void MEMSET(void *buff, int c, size_t n);
+
+void MEMCPY(void *dest, void *src, size_t size);
+
 
 #ifdef __cplusplus
 }

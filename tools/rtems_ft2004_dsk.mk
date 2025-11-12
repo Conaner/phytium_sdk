@@ -10,13 +10,13 @@ ft2004_dsk_aarch64_default:
 ft2004_dsk_aarch64_config:
 	@echo "======Copy FT2000/4 Test BSP Parameters"
 	@mkdir $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/ft2004 -p
-	@cp $(RTEMS_STANDALONE)/soc/ft2004/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/ft2004 -f
+	@cp $(RTEMS_STANDALONE)/soc/pd1904/fparameters.h $(RTEMS_SRC_DIR)/bsps/aarch64/phytium/include/soc/ft2004 -f
 
 	@echo "======AARCH64 FT2000/4 Test BSP"
 	$(call build_rtems_devtree,ft2004-dsk-board)
 	$(call config_rtems_bsp,ft2004-dsk-board-bsp.ini,$(RTEMS_SRC_DIR))
 
-ft2004_dsk_aarch64_bsp: clean_config ft2004_dsk_aarch64_config build_bsp
+ft2004_dsk_aarch64_bsp: clean_config ft2004_dsk_aarch64_config build_aarch64_bsp
 
 ft2004_dsk_aarch64_libbsd:
 	@echo "======AARCH64 FT2000/4 Test LIBBSD"
@@ -26,7 +26,7 @@ ft2004_dsk_aarch64_example:
 	@echo "======AARCH64 FT2000/4 Test Example"
 	@source ./tools/env_ft2004_dsk_aarch64.sh && cd $(RTEMS_EXAMPLE_DIR) && ./waf clean && ./waf
 
-ft2004_dsk_aarch64_clean:
+ft2004_dsk_aarch64_clean: clean_bsp clean_libbsd
 	@rm $(RTEMS_AARCH64_TOOL_PREFIX)/aarch64-rtems6/phytium_ft2004_dsk -rf
 	@rm $(RTEMS_EXAMPLE_DIR)/build/aarch64-rtems6-phytium_ft2004_dsk -rf
 

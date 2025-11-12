@@ -8,14 +8,14 @@
 ```
 python --version
 sudo apt-get update
-sudo apt-get build-dep binutils gcc g++ gdb unzip git python3.8-dev
+sudo apt-get install binutils gcc g++ gdb unzip git python3.8-dev
 ```
 
 - apt-get build-dep 需要将 /etc/apt/sources.list 的 deb-src 打开
 
 - 有些系统 python --version 没有效果，需要额外创建 python 软链接
 ```
-sudo ln -s /usr/bin/python3 /usr/bin/python
+sudo apt install python-is-python3
 ```
 
 ## 2. 获取 SDK 源码

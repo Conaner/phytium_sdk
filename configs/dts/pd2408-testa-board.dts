@@ -1,0 +1,16 @@
+/* SPDX-License-Identifier: BSD-2-Clause */
+
+/dts-v1/;
+
+/ {
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+
+	amba {
+		compatible = "simple-bus";
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		ranges;
+		 
+	};
+};

@@ -35,7 +35,7 @@ define bsp-link-cxx
 endef
 
 define default-bsp-post-link
-	$(OBJDUMP) -d $@ > $(basename $@).asm
+	$(RTEMS_CPU)-rtems$(RTEMS_API)-objdump -D $@ > $(basename $@).asm
 	$(SIZE) $@
 endef
 
