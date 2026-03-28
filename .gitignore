@@ -71,7 +71,6 @@ dkms.conf
 /standalone
 
 # rtems components
-/rtems/rtems
 /rtems/rtems-libbsd
 /rtems/rtems-source-builder
 /rtems/rtems-examples

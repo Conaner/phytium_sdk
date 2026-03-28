@@ -131,7 +131,7 @@ define build_rtems_fio
 						RTEMS_MAKEFILE_PATH=$(3) \
 						V=1
 	cd $(1) && $(2)objcopy -O binary fio fio.bin
-	cd $(1) && cp fio.bin /mnt/d/tftpboot/rtems.bin -f
+	cd $(1) && cp fio.bin /home/lyj/sdk_test/tftpboot/rtems.bin -f
 endef
 
 # void start_rtems_tester

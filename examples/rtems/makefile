@@ -48,7 +48,7 @@ all: subdir ${ARCH} $(PGM)
 ifeq ($(OS),Windows_NT)
 USR_BOOT_DIR		?= D:\\tftpboot
 else
-USR_BOOT_DIR		?= /mnt/d/tftpboot
+USR_BOOT_DIR		?= /home/lyj/sdk_test/tftpboot
 endif
 
 image: all
